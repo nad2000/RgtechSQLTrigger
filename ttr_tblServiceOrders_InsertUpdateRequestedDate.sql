@@ -15,7 +15,7 @@ BEGIN
 	DECLARE @requestedDate DATETIME
 	UPDATE dbo.tblServiceOrders
 	SET
-		@requestedDate = dbo.fn_RequestedDate( 
+		@requestedDate = dbo.tf_RequestedDate( 
 			DateReceived,
 			TimeReceived,
 			Priority),
