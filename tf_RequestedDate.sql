@@ -12,6 +12,7 @@ CREATE FUNCTION dbo.tf_RequestedDate(
 	@priority VARCHAR(50) )
 RETURNS DATETIME
 BEGIN
+	IF @priority = 'No Priority - TBA' RETURN NULL
 	DECLARE @datetimeReceived DATETIME = (CAST( @dateReceived AS DATETIME)+@timeReceived)
 	DECLARE @resposeTime INT = 
 		(SELECT TOP 1 ResponseTime FROM dbo.tblPriorities WHERE Priority=@priority);

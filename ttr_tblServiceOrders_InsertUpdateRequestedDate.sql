@@ -9,9 +9,10 @@ FOR INSERT, UPDATE
 WITH APPEND 
 AS
 BEGIN
-	-- IF ( @@ROWCOUNT < 1 ) RETURN
-	--IF ( SELECT COUNT(*) FROM inserted 
-	--	 WHERE [Status] IN ('New', 'Open', 'Ready for Scheduling') ) < 1 RETURN
+	IF ( @@ROWCOUNT < 1 ) RETURN
+	IF ( SELECT COUNT(*) FROM inserted 
+	     WHERE [Status] IN ('New', 'Open', 'Ready for Scheduling')
+	           AND Priority <> 'No Priority - TBA' ) < 1 RETURN
 	DECLARE @requestedDate DATETIME
 	UPDATE dbo.tblServiceOrders
 	SET
@@ -22,7 +23,8 @@ BEGIN
 		DateRequested = CAST( @requestedDate AS DATE),
 		TimeRequested = CAST( @requestedDate AS TIME)
 	WHERE [Status] IN ('New', 'Open', 'Ready for Scheduling')
-	AND SONumber IN (SELECT SONumber FROM inserted)
+	  AND Priority <> 'No Priority - TBA'
+	  AND SONumber IN (SELECT SONumber FROM inserted)
 END
 
 GO

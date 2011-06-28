@@ -9,7 +9,7 @@ GO
 
 CREATE FUNCTION dbo.tf_BusinessHoursAdd
 (
-	@d DATETIME, -- variable to hold the date you want to add sub. days to
+	@d DATETIME, -- variable to hold the date you want to add hours to
 	@businessHours INT -- number of business hours to add
 )
 RETURNS DATETIME
@@ -18,14 +18,20 @@ BEGIN
   DECLARE @bDayStart TIME = '8:30'
   DECLARE @bDayEnd TIME = '17:00'
   DECLARE @hoursInDay DECIMAL(3,1) = DATEDIFF( MINUTE, @bDayStart, @bDayEnd )/60. -- 8.5 
+  DECLARE @t TIME = CAST( @d AS TIME)
   DECLARE @bDays INT = CAST( @businessHours / @hoursInDay AS INT)
-  -- reste of minutes
+  -- reste of minutes to add to the time
   DECLARE @bMinutes INT = ( @businessHours - ( @bDays * @hoursInDay ) ) * 60
-  DECLARE @resultTime TIME = DATEADD( MINUTE, @bMinutes, CAST( @d AS TIME) )
+  DECLARE @resultTime TIME = DATEADD( MINUTE, @bMinutes, @t )
   IF @resultTime > @bDayEnd -- pushing it to the next business day
   BEGIN
     SET @bDays = @bDays + 1
     SET @resultTime = DATEADD( MINUTE, DATEDIFF( MINUTE, @bDayEnd, @resultTime), @bDayStart)
+  END
+  ELSE IF @resultTime < @bDayStart
+  BEGIN
+    SET @bDays = @bDays + 1
+    SET @resultTime = DATEADD( MINUTE, @bMinutes-DATEDIFF( MINUTE, @t, @bDayEnd), @bDayStart)
   END
   
   -- Declare the return variable here
@@ -50,5 +56,11 @@ PRINT 'PASS'
 IF dbo.tf_BusinessHoursAdd( '2011-06-24 9:00', 60)='2011-07-05 09:30'
 PRINT 'PASS'
 IF dbo.tf_BusinessHoursAdd( '2011-06-24 9:00', 10)='2011-06-27 10:30'
+PRINT 'PASS'
+IF dbo.tf_BusinessHoursAdd( '2011-06-24 16:30', 8)='2011-06-27 16:00' 
+PRINT 'PASS'
+IF dbo.tf_BusinessHoursAdd( '2011-06-23 16:30', 8)='2011-06-24 16:00' 
+PRINT 'PASS'
+IF dbo.tf_BusinessHoursAdd( '2011-06-23 10:30', 9)='2011-06-24 11:00' 
 PRINT 'PASS'
 */
