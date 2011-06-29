@@ -17,6 +17,11 @@ AS
 BEGIN
   DECLARE @bDayStart TIME = '8:30'
   DECLARE @bDayEnd TIME = '17:00'
+  -- If received outside the business hours, take the next day beginnig instead
+  IF CAST( @d AS TIME ) NOT BETWEEN @bDayStart AND @bDayEnd
+  BEGIN
+	SET @d = CAST( CAST( DATEADD( DAY, 1, @d) AS DATE ) AS DATETIME ) + @bDayStart
+  END
   DECLARE @hoursInDay DECIMAL(3,1) = DATEDIFF( MINUTE, @bDayStart, @bDayEnd )/60. -- 8.5 
   DECLARE @t TIME = CAST( @d AS TIME)
   DECLARE @bDays INT = CAST( @businessHours / @hoursInDay AS INT)
@@ -40,14 +45,15 @@ BEGIN
   WHILE @bDays <> 0 -- Keep adding/subtracting a day until @bdays becomes 0
     BEGIN
       SET @nDate = DATEADD( DAY, 1, @nDate)
-      -- ignore if it is Sat or Sunday
+      -- ignore if it is Sunday or Sat
       IF DATEPART( WEEKDAY, @nDate) NOT IN ( 1, 7)
 		SET @bDays = @bDays - 1
     END
+  IF DATEPART( WEEKDAY, @nDate) = 7 SET @nDate = DATEADD( DAY, 1, @nDate)
+  IF DATEPART( WEEKDAY, @nDate) = 1 SET @nDate = DATEADD( DAY, 1, @nDate)
   RETURN ( @nDate+@resultTime )
 END
 GO
-
 
 /* 
 -- Unit tests:
