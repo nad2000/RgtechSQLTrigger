@@ -46,11 +46,11 @@ BEGIN
     BEGIN
       SET @nDate = DATEADD( DAY, 1, @nDate)
       -- ignore if it is Sunday or Sat
-      IF DATEPART( WEEKDAY, @nDate) NOT IN ( 1, 7)
+      IF dbo.tf_WeekDay( @nDate ) NOT IN ( 1, 7)
 		SET @bDays = @bDays - 1
     END
-  IF DATEPART( WEEKDAY, @nDate) = 7 SET @nDate = DATEADD( DAY, 1, @nDate)
-  IF DATEPART( WEEKDAY, @nDate) = 1 SET @nDate = DATEADD( DAY, 1, @nDate)
+  IF dbo.tf_WeekDay( @nDate ) = 7 SET @nDate = DATEADD( DAY, 1, @nDate)
+  IF dbo.tf_WeekDay( @nDate ) = 1 SET @nDate = DATEADD( DAY, 1, @nDate)
   RETURN ( @nDate+@resultTime )
 END
 GO
