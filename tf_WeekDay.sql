@@ -5,7 +5,7 @@ Function returen invariant week day:
 	Tuesday = 3
 	Wednesday = 4
 	.....
-	Saturday = 7
+	Saturday = 0
 	Sunday = 1
 */
 
