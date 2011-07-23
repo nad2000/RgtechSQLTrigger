@@ -15,10 +15,18 @@ SELECT [SONumber]
   WHERE SONumber IN (  10015, 10017)
 GO  
 update [tblServiceOrders]
-set [TimeReceived] = '15:30'
+set [TimeReceived] = 
+CASE [TimeReceived]
+WHEN '15:30' THEN '15:10'
+ELSE '15:30'
+END
 where SONumber = 10015
 update [tblServiceOrders]
-set [TimeReceived] = '14:30'
+set [TimeReceived] = 
+CASE [TimeReceived]
+WHEN '14:30' THEN '14:10'
+ELSE '14:30'
+END
 where SONumber = 10017
 SELECT [SONumber]
       ,[BriefDescription]
@@ -120,3 +128,6 @@ IF dbo.tf_WeekDay( '2011-07-22' ) = 6 PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_WeekDay( '2011-07-23' ) = 0 PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_WeekDay( '2011-07-24' ) = 1 PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_WeekDay( '2011-07-25' ) = 2 PRINT 'PASS' ELSE PRINT 'FAILED'
+IF dbo.tf_WeekDay( '2011-07-26' ) = 3 PRINT 'PASS' ELSE PRINT 'FAILED'
+IF dbo.tf_WeekDay( '2011-07-27' ) = 4 PRINT 'PASS' ELSE PRINT 'FAILED'
+IF dbo.tf_WeekDay( '2011-07-28' ) = 5 PRINT 'PASS' ELSE PRINT 'FAILED'
