@@ -17,8 +17,13 @@ AS
 BEGIN
   DECLARE @bDayStart TIME = '8:30'
   DECLARE @bDayEnd TIME = '17:00'
+  -- If received before business ours change time to the beginning of the business day
+  IF CAST( @d AS TIME ) < @bDayStart
+  BEGIN
+	SET @d = CAST( CAST( @d AS DATE ) AS DATETIME ) + @bDayStart
+  END
   -- If received outside the business hours, take the next day beginnig instead
-  IF CAST( @d AS TIME ) NOT BETWEEN @bDayStart AND @bDayEnd
+  IF CAST( @d AS TIME ) > @bDayEnd
   BEGIN
 	SET @d = CAST( CAST( DATEADD( DAY, 1, @d) AS DATE ) AS DATETIME ) + @bDayStart
   END
@@ -58,15 +63,19 @@ GO
 /* 
 -- Unit tests:
 IF dbo.tf_BusinessHoursAdd( '2011-01-03 9:00', 10)='2011-01-04 10:30' 
-PRINT 'PASS'
+PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_BusinessHoursAdd( '2011-06-24 9:00', 60)='2011-07-05 09:30'
-PRINT 'PASS'
+PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_BusinessHoursAdd( '2011-06-24 9:00', 10)='2011-06-27 10:30'
-PRINT 'PASS'
+PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_BusinessHoursAdd( '2011-06-24 16:30', 8)='2011-06-27 16:00' 
-PRINT 'PASS'
+PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_BusinessHoursAdd( '2011-06-23 16:30', 8)='2011-06-24 16:00' 
-PRINT 'PASS'
+PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_BusinessHoursAdd( '2011-06-23 10:30', 9)='2011-06-24 11:00' 
-PRINT 'PASS'
+PRINT 'PASS' ELSE PRINT 'FAILED'
+IF dbo.tf_BusinessHoursAdd( '2012-02-16 6:01', 8)='2012-02-16 16:30' 
+PRINT 'PASS' ELSE PRINT 'FAILED'
+IF dbo.tf_BusinessHoursAdd( '2012-02-16 6:01', 9)='2012-02-17 9:00' 
+PRINT 'PASS' ELSE PRINT 'FAILED'
 */

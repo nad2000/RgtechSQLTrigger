@@ -13,6 +13,7 @@ SELECT [SONumber]
 	,Priority
   FROM [TigerpawDB].[dbo].[tblServiceOrders]
   WHERE SONumber IN (  10015, 10017)
+  
 GO  
 update [tblServiceOrders]
 set [TimeReceived] = 
@@ -57,8 +58,25 @@ IF dbo.tf_BusinessHoursAdd( '2011-06-23 16:30', 8)='2011-06-24 16:00'
 PRINT 'PASS' ELSE PRINT 'FAILED'
 IF dbo.tf_BusinessHoursAdd( '2011-06-23 10:30', 9)='2011-06-24 11:00' 
 PRINT 'PASS' ELSE PRINT 'FAILED'
+IF dbo.tf_BusinessHoursAdd( '2012-02-16 6:01', 8)='2012-02-16 16:30' 
+PRINT 'PASS' ELSE PRINT 'FAILED'
+IF dbo.tf_BusinessHoursAdd( '2012-02-16 6:01', 9)='2012-02-17 9:00' 
+PRINT 'PASS' ELSE PRINT 'FAILED'
 
 -- tf_RequestedDate UDF unit tests:
+
+IF dbo.tf_RequestedDate(
+	'2012-02-16',
+	'6:01',
+	'Within 24 Hours' )='2012-02-16 16:30'
+PRINT 'PASS' ELSE PRINT 'FAILED'
+
+IF dbo.tf_RequestedDate(
+	'2012-02-16',
+	'8:29',
+	'Within 24 Hours' )='2012-02-16 16:30'
+PRINT 'PASS' ELSE PRINT 'FAILED'
+
 IF dbo.tf_RequestedDate(
 	'2011-06-29',
 	'18:00',
