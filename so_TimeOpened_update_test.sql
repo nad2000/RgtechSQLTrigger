@@ -15,11 +15,11 @@ ORDER BY NEWID()
 BEGIN TRANSACTION 
 -- SET @SONumber= 10015
 
-SELECT TimeOpened FROM dbo.tblServiceOrders WHERE SONumber=@SONumber;
+SELECT 'BEFORE:' AS [ ], TimeOpened FROM dbo.tblServiceOrders WHERE SONumber=@SONumber;
 UPDATE dbo.tblServiceOrders 
 SET [Status] = 'Customer Updated'
 WHERE  SONumber = @SONumber;
-SELECT SONumber, TimeOpened FROM dbo.tblServiceOrders WHERE SONumber=@SONumber;
-SELECT SONumber, StartDateTime FROM @OldestStartDateTime WHERE SONumber=@SONumber;
+SELECT 'AFTER UPDATE:' AS [ ], SONumber, TimeOpened FROM dbo.tblServiceOrders WHERE SONumber=@SONumber;
+SELECT 'EXPECTED:' AS [ ], SONumber, StartDateTime FROM @OldestStartDateTime WHERE SONumber=@SONumber;
 
 ROLLBACK
