@@ -29,30 +29,36 @@ BEGIN
 	END
 
 /*
-	It basically needs to occur on the UPDATE of tblServiceOrders where the tblServiceOrders.status is changed to "Customer Updated" 
+Trigger based on ANY change to the SO 'Status'
 
-	What it needs to do is look for the earliest SO Note (tblSONotes) assigned to this Service Order that has the following text: 'Status changed from "New" to "Open"' within the text of the Note. 
+Check for existance of Time Logs associated with the service order. (tblSOLogs)
+If a Time Log exists, set open date & open time of SO to the same as the start date & start time of the oldest Time Log associated with that service order.
 
-	It then needs to get the time from the timestamp of the note and update tblServiceOrders.timeopened with this time 	
+if no time log exists, do not alter open date.
 */
+
+	DECLARE @OldestStartDateTime TABLE(
+		SONumber int NOT NULL PRIMARY KEY,
+		StartDateTime datetime NOT NULL);
+
+	INSERT INTO @OldestStartDateTime (SONumber, StartDateTime) 
+	-- oldest Time Log associated with that service order
+	SELECT sol.SONumber, MIN( sol.StartDateTime) AS StartDateTime
+	FROM dbo.tblSOLogs AS sol JOIN (
+		-- SOs, which status has been changed:
+		SELECT i.SONumber FROM inserted AS i JOIN deleted AS d 
+			ON i.SONumber=d.SONumber
+		WHERE ( i.[Status] <> d.[Status]
+			    OR ( d.[Status] IS NULL AND i.[Status] IS NOT NULL))
+	) AS cs ON cs.SONumber = sol.SONumber
+	GROUP BY sol.SONumber;
 	  
 	UPDATE dbo.tblServiceOrders
-	SET TimeOpened = ISNULL(
-
-		(SELECT TOP 1 n.DateCreated
-		 FROM dbo.tblSONotes AS n
-		 WHERE n.SONumber = dbo.tblServiceOrders.SONumber
-		   AND n.Note LIKE '%Status changed from "New" to "Open"%'
-		 ORDER BY n.DateCreated ASC),
-		 
-		 TimeOpened )
-	
-	WHERE SONumber IN (
-	  -- SOs, which status changed to "Customer Updated"
-	  SELECT i.SONumber FROM inserted AS i JOIN deleted AS d 
-	    ON i.SONumber=d.SONumber
-	  WHERE ( i.[Status] <> d.[Status] OR d.[Status] IS NULL )
-	    AND i.[Status] = 'Customer Updated' )
+	SET
+		TimeOpened = sdt.StartDateTime,
+		DateOpened = sdt.StartDateTime
+	FROM dbo.tblServiceOrders AS so JOIN @OldestStartDateTime AS sdt
+	  ON sdt.SONumber = so.SONumber;
 	 
 END
 
