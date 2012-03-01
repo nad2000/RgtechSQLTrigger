@@ -59,6 +59,22 @@ if no time log exists, do not alter open date.
 		DateOpened = sdt.StartDateTime
 	FROM dbo.tblServiceOrders AS so JOIN @OldestStartDateTime AS sdt
 	  ON sdt.SONumber = so.SONumber;
+	  
+/*
+If the Status of the Service Order is changed from "Purchasing Attention Required" 
+to "Customer Updated" it must automatically change the status back to "Purchasing Attention Required".
+*/	  
+
+	UPDATE dbo.tblServiceOrders
+	SET
+		[Status] = 'Purchasing Attention Required'
+	FROM dbo.tblServiceOrders AS so JOIN (
+		-- SOs, which status has been changed:
+		SELECT i.SONumber FROM inserted AS i JOIN deleted AS d 
+			ON i.SONumber=d.SONumber
+		WHERE i.[Status]='Customer Updated'
+		  AND d.[Status]='Purchasing Attention Required'
+	) AS cs ON cs.SONumber = so.SONumber;
 	 
 END
 
